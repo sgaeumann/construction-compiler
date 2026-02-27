@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Jacques Supcik <jacques.supcik@hefr.ch>
+#
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+
 import io
 import sys
 
