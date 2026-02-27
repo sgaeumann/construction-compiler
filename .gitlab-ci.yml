@@ -1,6 +1,7 @@
 stages:
 - analyze
 - test
+- doc
 - deploy
 
 default:
@@ -20,8 +21,8 @@ unit-test:
   script:
     - uv run pytest
 
-build-docs:
-  stage: deploy
+build-doc:
+  stage: doc
   script:
     - cd docs
     - uv run make html
@@ -33,7 +34,7 @@ build-docs:
 deploy-pages:
   stage: deploy
   dependencies:
-    - build-docs
+    - build-doc
   script:
     # Copy built docs to public directory
     - mkdir -p public

@@ -1,0 +1,10 @@
+(*
+   SPDX-FileCopyrightText: 2026 Jacques Supcik <jacques.supcik@hefr.ch>
+   SPDX-License-Identifier: Apache-2.0 OR MIT
+*)
+
+syntax = {production}.
+production = identifier "=" expression "." .
+expression = term {"|" term}.
+term = factor {factor}.
+factor = identifier | string | "(" expression ")" | "[" expression "]" | "{" expression "}".

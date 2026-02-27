@@ -117,9 +117,36 @@ class Scanner:
         elif self._ch in self.token_map:
             self.sym = self.token_map[self._ch]
             self.value = self._ch
+            if self._ch == Token.LPAREN:
+                # check for comment
+                if self.is_comment():
+                    self.skip_comments()
+                return  # avoid skipping char
             self.get_next_char()
         else:
             self.sym = Token.OTHER
             self.value = self._ch
             self.get_next_char()
         logger.info(f"Token: {self.sym}, Value: {self.value}")
+
+    def is_comment(self) -> bool:
+        if self._ch == "(":
+            # opening comment
+            self.get_next_char()
+            if self._ch == "*":
+                return True
+        return False
+
+    def skip_comments(self) -> None:
+        if self.is_comment():
+            # new opening comment
+            self.skip_comments()
+        elif self._ch == "*":
+            # closing comment
+            self.get_next_char()
+            if self._ch == ")":
+                return
+        else:
+            while self._ch != "*" or self._ch != ")":
+                # ignore other characters
+                self.get_next_char()
