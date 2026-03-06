@@ -33,13 +33,15 @@ class Parser:
         logger.debug("Factor")
         sym = self.scanner.sym
         if sym == Token.IDENT:
-            self.scanner.get_next_symbol()
             # production.identifier.value = ...
-            return Identifier(self.scanner.value)
-        elif sym == Token.LITERAL:
+            ident = Identifier(self.scanner.value)
             self.scanner.get_next_symbol()
+            return ident
+        elif sym == Token.LITERAL:
             # production.literal.value = ...
-            return Literal(self.scanner.value)
+            lit = Literal(value= self.scanner.value)
+            self.scanner.get_next_symbol()
+            return lit
         elif sym == Token.LPAREN:
             self.scanner.get_next_symbol()
             expr: Expression = self.expression()

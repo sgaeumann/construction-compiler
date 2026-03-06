@@ -31,7 +31,7 @@ class Term(Node):
 
     def rich(self) -> str:
         return (
-            f"[magenta]{[factor.rich() for factor in self.factors]}[/magenta]"
+            f"[magenta]{" ".join([factor.rich() for factor in self.factors])}[/magenta]"
         )
 
 
@@ -51,7 +51,7 @@ class Literal(Factor):
 
     def rich(self) -> str:
         return (
-            f"{self.value}"
+            f"\"{self.value}\""
         )
 
 
@@ -63,10 +63,10 @@ class Expression(Factor):
     def rich(self) -> str:
         if self.paren:
             return (
-                f"[cyan]([/cyan] {[term.rich() for term in self.terms]}[cyan])[/cyan]"
+                f"[cyan]([/cyan] {" ".join([term.rich() for term in self.terms])}[cyan])[/cyan]"
             )
         return (
-            f"{[term.rich() for term in self.terms]}"
+            f"{" | ".join([term.rich() for term in self.terms])}"
         )  
 
 
