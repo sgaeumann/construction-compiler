@@ -26,6 +26,6 @@ def test_simple():
     scanner = Scanner()
     source = io.StringIO(SRC)
     scanner.init(source)
-    parser = Parser(scanner=scanner)
+    parser = Parser(scanner=scanner, terminal_sym=set(), sym=set())
 
     parser.parse()

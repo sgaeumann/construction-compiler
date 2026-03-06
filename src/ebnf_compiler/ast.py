@@ -7,22 +7,17 @@ EBNF Abstract Syntax Tree
 """
 
 from dataclasses import dataclass
-import rich
 
 
 @dataclass
 class Node:
-    terminal_sym = {}
-    sym = {}   
-
+    pass
 
 
 @dataclass
 class Factor(Node):
     def rich(self) -> str:
-        return (
-            f""
-        )
+        return ""
 
 
 @dataclass
@@ -40,9 +35,7 @@ class Identifier(Factor):
     value: str
 
     def rich(self) -> str:
-        return (
-            f"{self.value}"
-        )
+        return f"{self.value}"
 
 
 @dataclass
@@ -50,9 +43,7 @@ class Literal(Factor):
     value: str
 
     def rich(self) -> str:
-        return (
-            f"\"{self.value}\""
-        )
+        return f'"{self.value}"'
 
 
 @dataclass
@@ -62,12 +53,8 @@ class Expression(Factor):
 
     def rich(self) -> str:
         if self.paren:
-            return (
-                f"[cyan]([/cyan] {" ".join([term.rich() for term in self.terms])}[cyan])[/cyan]"
-            )
-        return (
-            f"{" | ".join([term.rich() for term in self.terms])}"
-        )  
+            return f"[cyan]([/cyan] {" ".join([term.rich() for term in self.terms])}[cyan])[/cyan]"
+        return f"{" | ".join([term.rich() for term in self.terms])}"
 
 
 @dataclass
@@ -75,9 +62,7 @@ class Option(Factor):
     expr: Expression
 
     def rich(self) -> str:
-        return (
-            f"[cyan][[/cyan]{self.expr.rich()}[cyan]][/cyan]"
-        )
+        return f"[cyan][[/cyan]{self.expr.rich()}[cyan]][/cyan]"
 
 
 @dataclass
@@ -85,9 +70,7 @@ class Repetition(Factor):
     expr: Expression
 
     def rich(self) -> str:
-        return (
-            f"[cyan]{{[/cyan] {self.expr.rich()} [cyan]}}[/cyan]"
-        )
+        return f"[cyan]{{[/cyan] {self.expr.rich()} [cyan]}}[/cyan]"
 
 
 @dataclass
@@ -107,6 +90,4 @@ class Syntax(Node):
     production: list[Production]
 
     def rich(self) -> str:
-        return (
-            f":raccoon:\t AST \t :raccoon:\n{"\n".join([prod.rich() for prod in self.production])}"
-        )
+        return f":raccoon:\t AST \t :raccoon:\n{"\n".join([prod.rich() for prod in self.production])}"

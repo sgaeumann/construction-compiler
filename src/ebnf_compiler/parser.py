@@ -12,13 +12,24 @@ from loguru import logger
 
 from .scanner import Scanner
 from .tokens import Token
-from .ast import *
+from .ast import (
+    Syntax,
+    Production,
+    Repetition,
+    Expression,
+    Factor,
+    Identifier,
+    Literal,
+    Option,
+    Term,
+)
 
 
 @dataclass
 class Parser:
+    terminal_sym: set
+    sym: set
     scanner: Scanner
-    #ast_root: Node # root node of AST
     has_error: bool = False
 
     def raise_error(self, msg: str) -> None:
@@ -33,13 +44,17 @@ class Parser:
         logger.debug("Factor")
         sym = self.scanner.sym
         if sym == Token.IDENT:
+            self.terminal_sym.add("letter")
             # production.identifier.value = ...
-            ident = Identifier(self.scanner.value)
+            ident = Identifier(value=self.scanner.value)
+            if self.scanner.value.isdigit():
+                self.terminal_sym.add("digit")
             self.scanner.get_next_symbol()
             return ident
         elif sym == Token.LITERAL:
+            self.terminal_sym.add("letter")
             # production.literal.value = ...
-            lit = Literal(value= self.scanner.value)
+            lit = Literal(value=self.scanner.value)
             self.scanner.get_next_symbol()
             return lit
         elif sym == Token.LPAREN:
@@ -52,7 +67,7 @@ class Parser:
             return expr
         elif sym == Token.LBRAK:
             self.scanner.get_next_symbol()
-            opt = Option(expr= self.expression())
+            opt = Option(expr=self.expression())
             self.expression()
             if self.scanner.sym != Token.RBRAK:
                 self.raise_expected_error(Token.RBRAK)
@@ -60,7 +75,7 @@ class Parser:
             return opt
         elif sym == Token.LBRACE:
             self.scanner.get_next_symbol()
-            rep = Repetition(expr= self.expression())
+            rep = Repetition(expr=self.expression())
             if self.scanner.sym != Token.RBRACE:
                 self.raise_expected_error(Token.RBRACE)
             self.scanner.get_next_symbol()
@@ -74,7 +89,8 @@ class Parser:
     def term(self) -> Term:
         logger.debug("Term")
         # append factor in term.factor
-        t = Term([self.factor()])
+        t = Term(factors=[self.factor()])
+        self.sym.add("Term")
         while self.scanner.sym in (
             Token.IDENT,
             Token.LITERAL,
@@ -88,8 +104,9 @@ class Parser:
 
     def expression(self) -> Expression:
         logger.debug("Expression")
+        self.sym.add("Expression")
         # append factor in production.expression.terms
-        expr = Expression(terms = [self.term()])
+        expr = Expression(terms=[self.term()])
         while self.scanner.sym == Token.BAR:
             self.scanner.get_next_symbol()
             # append factor in production.expression.terms
@@ -98,10 +115,11 @@ class Parser:
 
     def production(self) -> Production:
         logger.debug("Production")
+        self.sym.add("Production")
         if self.scanner.sym != Token.IDENT:
             self.raise_expected_error(Token.IDENT)
         # production.identifier = ...
-        ident = Identifier(self.scanner.value)
+        ident = Identifier(value=self.scanner.value)
         self.scanner.get_next_symbol()
         if self.scanner.sym != Token.EQL:
             self.raise_expected_error(Token.EQL)
@@ -115,9 +133,10 @@ class Parser:
 
     def syntax(self) -> Syntax:
         logger.debug("Syntax")
+        self.sym.add("Syntax")
         # create syntax node
-        #self.ast_root = Syntax([])
-        ast = Syntax([])
+        # self.ast_root = Syntax([])
+        ast = Syntax(production=[])
         while self.scanner.sym != Token.EOF:
             if self.scanner.sym != Token.IDENT:
                 self.raise_expected_error(Token.IDENT)

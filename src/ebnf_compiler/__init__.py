@@ -19,7 +19,7 @@ from rich.console import Console
 
 from .parser import Parser
 from .scanner import Scanner
-from .ast import *
+from .ast import Syntax
 
 console = Console()
 app = typer.Typer()
@@ -55,7 +55,7 @@ def main(
 
     scanner = Scanner()
     scanner.open(source)
-    parser = Parser(scanner=scanner)
+    parser = Parser(scanner=scanner, terminal_sym=set(), sym=set())
 
     compiler = Compiler(scanner=scanner, parser=parser)
     ast_ = compiler.ast()
@@ -66,6 +66,17 @@ def main(
     elif show_tree:
         console.print(Panel(Pretty(ast_, indent_size=2), title="Syntax Tree"))
     else:
+        console.print(
+            Panel(
+                ("\n".join(f"- {i}" for i in parser.terminal_sym)),
+                title="Terminal symbols",
+            )
+        )
+        console.print(
+            Panel(
+                ("\n".join(f"- {i}" for i in parser.sym)), title="Non-terminal symbols"
+            )
+        )
         console.print(Panel(ast_.rich(), title="Code"))
 
 
