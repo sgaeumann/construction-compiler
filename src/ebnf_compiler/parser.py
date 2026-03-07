@@ -44,15 +44,12 @@ class Parser:
         logger.debug("Factor")
         sym = self.scanner.sym
         if sym == Token.IDENT:
-            self.terminal_sym.add("letter")
+            self.terminal_sym.add(self.scanner.value)
             # production.identifier.value = ...
             ident = Identifier(value=self.scanner.value)
-            if self.scanner.value.isdigit():
-                self.terminal_sym.add("digit")
             self.scanner.get_next_symbol()
             return ident
         elif sym == Token.LITERAL:
-            self.terminal_sym.add("letter")
             # production.literal.value = ...
             lit = Literal(value=self.scanner.value)
             self.scanner.get_next_symbol()
