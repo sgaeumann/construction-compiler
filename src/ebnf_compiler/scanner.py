@@ -27,6 +27,7 @@ class Scanner:
     value: str = ""
 
     _ch: str = ""
+    _peek: str = ""
     _file_name: Path | None = None
     _text: typing.TextIO | None = None
     _text_line: str = ""
@@ -71,9 +72,25 @@ class Scanner:
         while self._ch.isspace():
             self.get_next_char()
 
+    def peek_next_char(self) -> str:
+        """checks the next character without consuming it"""
+        if self._peek != "":
+            return self._peek
+        if self.eof or self._text_line == "":
+            return ""
+        self._peek = self._text_line[0]
+        return self._peek
+
     def get_next_char(self) -> None:
         if self._text is None:
             raise Exception("Scanner not initialized")
+        # consume peek if not empty
+        if self._peek != "":
+            self._ch = self._peek
+            self._peek = ""
+            self._text_line = self._text_line[1:]  # consume from _text_line
+            self._col_no += 1
+            return
         while not self.eof and self._text_line == "":
             self._text_line = self._text.readline()
             self._line_no += 1
@@ -114,14 +131,13 @@ class Scanner:
         elif self._ch == "":
             self.sym = Token.EOF
             self.value = ""
+        elif self._ch == "(" and self.peek_next_char() == "*":
+            # check for comment
+            self.skip_comments()
+            self.get_next_symbol()
         elif self._ch in self.token_map:
             self.sym = self.token_map[self._ch]
             self.value = self._ch
-            if self._ch == Token.LPAREN:
-                # check for comment
-                if self.is_comment():
-                    self.skip_comments()
-                return  # avoid skipping char
             self.get_next_char()
         else:
             self.sym = Token.OTHER
@@ -129,24 +145,22 @@ class Scanner:
             self.get_next_char()
         logger.info(f"Token: {self.sym}, Value: {self.value}")
 
-    def is_comment(self) -> bool:
-        if self._ch == "(":
-            # opening comment
-            self.get_next_char()
-            if self._ch == "*":
-                return True
-        return False
-
     def skip_comments(self) -> None:
-        if self.is_comment():
-            # new opening comment
-            self.skip_comments()
-        elif self._ch == "*":
-            # closing comment
-            self.get_next_char()
-            if self._ch == ")":
-                return
-        else:
-            while self._ch != "*" or self._ch != ")":
-                # ignore other characters
+        # consume characters (*
+        self.get_next_char()
+        self.get_next_char()
+
+        while not self.eof:
+            if self._ch == "(" and self.peek_next_char() == "*":
+                # nested comment
+                self.skip_comments()
+                continue
+            elif self._ch == "*" and self.peek_next_char() == ")":
+                # end of comment --> consume characters *)
                 self.get_next_char()
+                self.get_next_char()
+                return
+            else:
+                # ignore comment's content
+                self.get_next_char()
+        self.print_error("Unterminated comment")

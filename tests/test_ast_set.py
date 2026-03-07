@@ -28,8 +28,8 @@ def test_ast_set():
 
     parser.parse()
 
-    expected_terminal_sym = {"letter","digit"}
-    expected_sym = {"Term","Expression","Production","Syntax"}
+    expected_terminal_sym = {"letter", "digit"}
+    expected_sym = {"Term", "Expression", "Production", "Syntax"}
 
-    assert(parser.terminal_sym == expected_terminal_sym)
-    assert(parser.sym == expected_sym)
+    assert parser.terminal_sym == expected_terminal_sym
+    assert parser.sym == expected_sym
